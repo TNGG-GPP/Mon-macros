@@ -1,13 +1,13 @@
-Sub Âûá_ãîäà()
+Sub Выб_года()
 UserForm2.Show
 End Sub
-Sub ÂêëÂûêë(flag As Boolean)
+Sub ВклВыкл(flag As Boolean)
 If flag Then Application.EnableEvents = False: Application.ScreenUpdating = False Else Application.EnableEvents = True: Application.ScreenUpdating = True
 End Sub
-Public Sub Ãðàôèê_V2()
-ÂêëÂûêë True
-Âîññòô
-Const Last_col = 150    ' êîëîíêà ëèñòà, ñ êîòîðîé íà÷èíàåòñÿ ïîèñê ïîñëåäíåé íå ïóñòîé ÿ÷åéêè äèàïàçîíà äàííûõ
+Public Sub График_V2()
+ВклВыкл True
+Восстф
+Const Last_col = 150    ' колонка листа, с которой начинается поиск последней не пустой ячейки диапазона данных
 Const F_col = 2
 Dim l_Ros, l_Cols As Integer
 Dim Maxx, Minn As Variant
@@ -15,10 +15,10 @@ Dim Full_range As Range
 Dim Header_range As Range
 l_Cols = Last_col
 l_Ros = 1
-Do ' îïðåäåëåíèå øèðèíû ìàññèâà
+Do ' определение ширины массива
 If l_Cols > F_col Then l_Cols = l_Cols - 1 Else Exit Do
 Loop While ActiveSheet.Cells(3, l_Cols).Value = ""
-Do ' îïðåäåëåíèå âûñîòû äàííûõ
+Do ' определение высоты данных
     l_Ros = l_Ros + 1
 Loop While ActiveSheet.Cells(l_Ros + 3, F_col - 1).Value <> ""
 l_Cols = l_Cols - 1
