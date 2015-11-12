@@ -1,0 +1,101 @@
+Sub Âûá_ãîäà()
+UserForm2.Show
+End Sub
+Sub ÂêëÂûêë(flag As Boolean)
+If flag Then Application.EnableEvents = False: Application.ScreenUpdating = False Else Application.EnableEvents = True: Application.ScreenUpdating = True
+End Sub
+Public Sub Ãðàôèê_V2()
+ÂêëÂûêë True
+Âîññòô
+Const Last_col = 150    ' êîëîíêà ëèñòà, ñ êîòîðîé íà÷èíàåòñÿ ïîèñê ïîñëåäíåé íå ïóñòîé ÿ÷åéêè äèàïàçîíà äàííûõ
+Const F_col = 2
+Dim l_Ros, l_Cols As Integer
+Dim Maxx, Minn As Variant
+Dim Full_range As Range
+Dim Header_range As Range
+l_Cols = Last_col
+l_Ros = 1
+Do ' îïðåäåëåíèå øèðèíû ìàññèâà
+If l_Cols > F_col Then l_Cols = l_Cols - 1 Else Exit Do
+Loop While ActiveSheet.Cells(3, l_Cols).Value = ""
+Do ' îïðåäåëåíèå âûñîòû äàííûõ
+    l_Ros = l_Ros + 1
+Loop While ActiveSheet.Cells(l_Ros + 3, F_col - 1).Value <> ""
+l_Cols = l_Cols - 1
+l_Ros = l_Ros - 1
+Set Full_range = ActiveSheet.Range(Cells(4, 2), Cells(l_Ros + 3, l_Cols + 1)) 'Çàäàíèå äèàïàçîíà äàííûõ
+Set Header_range = ActiveSheet.Range(Cells(3, 2), Cells(3, l_Cols + 1)) 'Çàäàíèå äèàïàçîíà çàãîëîâêîâ
+Ïóä , Full_range.Address
+Maxx = Application.WorksheetFunction.Max(Full_range) 'îïðåäåëåíèå ìàêñèìóìà
+Minn = Application.WorksheetFunction.Min(Full_range) 'îïðåäåëåíèå ìèíèìóìà
+ActiveSheet.ChartObjects(1).Select
+With ActiveChart
+    If Not (Application.WorksheetFunction.IsText(Cells(3, 2))) Then
+        .Axes(xlCategory).MinimumScale = Cells(3, 2): .Axes(xlCategory).MaximumScale = Cells(3, l_Cols + 1) 'ìàêñèìóì ìèíèìóì îñè Õ
+    Else
+        .Axes(xlCategory).MinimumScale = 1: .Axes(xlCategory).MaximumScale = l_Cols
+    End If
+    .Axes(xlValue).MinimumScale = Minn - (Maxx - Minn) * 0.1 'ìàêñèìóì ìèíèìóì îñè Y
+    .Axes(xlValue).MaximumScale = Maxx + (Maxx - Minn) * 0.1
+    For n = 1 To l_Ros
+        If Application.WorksheetFunction.Sum(Full_range.Rows(n)) <> 0 Then .SeriesCollection(n).Values = Full_range.Rows(n): .SeriesCollection(n).XValues = Header_range      'Äèàïàçîí îñè Y è äèàïàçîí çàãîëîâêà
+    Next n
+End With
+ÂêëÂûêë False
+End Sub
+Sub Ïóä(Optional Last_col As Integer, Optional Ranger As String) 'èçìåíåí 20.05.09 10:00
+'×àñòü ìàêðîñà - î÷èñòêà çíà÷åíèé îò ìóñîðà
+Dim ranG1 As Range
+Dim sr1, sr2 As Range
+If Last_col <> 0 Then Set ranG1 = ActiveSheet.Range(Cells(4, 2), Cells(7, Last_col)) Else Set ranG1 = ActiveSheet.Range(Ranger)
+If (Ranger = "") And (Last_col = 0) Then x = MsgBox("Îòñóòñòâóþò âõîäíûå äàííûå", vbCritical, "Îøèáêà!!!"): Exit Sub
+Addr = ""
+Set sr2 = ActiveSheet.Range("IV29")
+With ranG1
+    Dim iRange As Range, iCell As Range
+    Set iRange = .Cells
+        For Each iCell In iRange
+            If WorksheetFunction.IsText(iCell) Or iCell = 0 Then Set sr1 = iCell: Set sr2 = Union(sr1, sr2)
+        Next
+End With
+sr2.Clear
+End Sub
+Sub ÓÄ_ïóñò_ñòîëá()
+'ìàêðîñ î÷èñòêè âõîäíûõ äàííûõ, óäàëåíèå ðÿäîâ, â êîòîðûõ íå áûëî äàííûõ
+ÂêëÂûêë True
+Dim Ros, Roc, Last_true, n As Integer
+Dim flag As Boolean
+'îïðåäåëåíèå ïîñëåäíåé êîëîíêè
+Last_col = 1
+Do While ActiveSheet.Cells(2, Last_col + 2).Value <> ""
+    Last_col = Last_col + 1
+Loop
+Ïóä , ActiveSheet.Cells(1, 255).Text
+Last_true = Last_col
+Ros = 1
+Do While ActiveSheet.Cells(3 + Ros, 1).Value <> ""
+    ActiveSheet.Cells(3 + Ros, 2).Select
+    Ros = Ros + 1
+Loop
+flag = True
+Roc = 0
+For n = 1 To Last_col - 2
+    If Cells(4, n + 2) = "" Then
+        Do
+        Roc = Roc + 1
+        If Cells(Roc + 2, n + 2) <> "" Then flag = False
+        Loop While (Roc < Ros) And (Cells(Roc + 2, n + 2) = "")
+        If flag = True Then ActiveSheet.Range(Cells(2, n + 3), Cells(Ros + 2, Last_col + 1)).Copy Destination:=Cells(2, n + 2): Last_col = Last_col - 1: ActiveSheet.Range(Cells(2, Last_col + 2), Cells(Ros + 2, Last_col + 2)).Clear: ActiveSheet.Cells(4, Last_col + 2) = "X": n = n - 1
+        flag = True
+        Roc = 0
+    End If
+Next n
+ActiveSheet.Range(Cells(4, Last_col + 2), Cells(4, Last_true + 2)).Clear
+ÂêëÂûêë False
+End Sub
+Sub Âîññòô()
+'÷àñòü ìàêðîñà - âîññòàíîâëåíèå ôîðìóë
+Source = ActiveSheet.Cells(1, 256).Text
+dest = ActiveSheet.Cells(2, 256).Text
+ActiveSheet.Range(Source).Copy Destination:=ActiveSheet.Range(dest)
+End Sub
